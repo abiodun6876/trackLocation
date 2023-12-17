@@ -125,6 +125,23 @@
     .saved-coordinates {
       margin-top: 20px;
     }
+
+    #coordinates-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    #coordinates-table th, #coordinates-table td {
+      border: 1px solid #ddd;
+      padding: 8px;
+      text-align: left;
+    }
+
+    #coordinates-table th {
+      background-color: #4CAF50;
+      color: white;
+    }
   </style>
   <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
 </head>
@@ -159,7 +176,18 @@
         <button class="tab" id="show-coordinates-tab">Show Coordinates</button>
         <button class="tab" id="hide-coordinates-tab">Hide Coordinates</button>
       </div>
-      <div class="coordinates-container" id="coordinates-container"></div>
+      <div class="coordinates-container" id="coordinates-container">
+        <table id="coordinates-table">
+          <thead>
+            <tr>
+              <th>Latitude</th>
+              <th>Longitude</th>
+              <th>Timestamp</th>
+            </tr>
+          </thead>
+          <tbody id="coordinates-body"></tbody>
+        </table>
+      </div>
       <div class="saved-coordinates" id="saved-coordinates"></div>
     </div>
   </div>
@@ -222,6 +250,7 @@
       $("#show-coordinates-tab").on("click", function () {
         $(".coordinates-container").show();
         $("#saved-coordinates").hide();
+        updateCoordinatesTable();
       });
 
       $("#hide-coordinates-tab").on("click", function () {
@@ -237,6 +266,7 @@
             var timestamp = new Date().toISOString();
             coordinates.push([position.coords.latitude, position.coords.longitude, timestamp]);
             localStorage.setItem("trackedCoordinates", JSON.stringify(coordinates));
+            updateCoordinatesTable();
           }, error, {
             enableHighAccuracy: true,
             maximumAge: 0,
@@ -263,10 +293,25 @@
         var timestamp = new Date().toISOString();
         coordinates.push([latitude, longitude, timestamp]);
         localStorage.setItem("trackedCoordinates", JSON.stringify(coordinates));
+        updateCoordinatesTable();
       }
 
       function error() {
         console.log("Unable to retrieve the location.");
+      }
+
+      function updateCoordinatesTable() {
+        var coordinatesBody = $("#coordinates-body");
+        coordinatesBody.empty();
+
+        if (coordinates.length > 0) {
+          coordinates.forEach(function (coord) {
+            var row = "<tr><td>" + coord[0] + "</td><td>" + coord[1] + "</td><td>" + coord[2] + "</td></tr>";
+            coordinatesBody.append(row);
+          });
+        } else {
+          coordinatesBody.append("<tr><td colspan='3'>No coordinates available</td></tr>");
+        }
       }
     });
   </script>
